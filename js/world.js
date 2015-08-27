@@ -11,11 +11,11 @@ function getPascalTriangle(rows) {
 }
 
 
-function display() {
+var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+function displayTriangle() {
     getPascalTriangle(10);
     console.log(THREE.FontUtils.faces);
     var scene = new THREE.Scene();
-    var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 
     var renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -69,10 +69,11 @@ function display() {
             console.log(numberCorrection);
             xoffset += 1
             var yoffset = 2 - row / 2;
+            var zoffset = 0;
             geom = new THREE.ShapeGeometry(shapes);
             mat = new THREE.MeshBasicMaterial();
             mesh = new THREE.Mesh(geom, mat);
-            mesh.position.set(xoffset, yoffset, 0);
+            mesh.position.set(xoffset, yoffset, zoffset);
             scene.add(mesh);
 
             previousNumber = currentNumber;
@@ -82,6 +83,118 @@ function display() {
         requestAnimationFrame(render);
         renderer.render(scene, camera);
     }
-
     render();
 }
+
+
+
+
+
+
+
+
+// testing camera movement
+
+THREE.PerspectiveCamera.prototype.setRotateX = function( deg ){
+    if ( typeof( deg ) == 'number' && parseInt( deg ) == deg ){
+        this.rotation.x = deg * ( Math.PI / 180 );
+    }
+};
+THREE.PerspectiveCamera.prototype.setRotateY = function( deg ){
+    if ( typeof( deg ) == 'number' && parseInt( deg ) == deg ){
+        this.rotation.y = deg * ( Math.PI / 180 );
+    }
+};
+THREE.PerspectiveCamera.prototype.setRotateZ = function( deg ){
+    if ( typeof( deg ) == 'number' && parseInt( deg ) == deg ){
+        this.rotation.z = deg * ( Math.PI / 180 );
+    }
+};
+THREE.PerspectiveCamera.prototype.getRotateX = function(){
+    return Math.round( this.rotation.x * ( 180 / Math.PI ) );
+};
+THREE.PerspectiveCamera.prototype.getRotateY = function(){
+    return Math.round( this.rotation.y * ( 180 / Math.PI ) );
+};
+THREE.PerspectiveCamera.prototype.getRotateZ = function(){
+    return Math.round( this.rotation.z * ( 180 / Math.PI ) );
+};
+
+// forward backward implementation
+
+
+const KEYUP             = 38;        // up key
+const KEYDOWN             = 40;        // down key
+const KEYLEFT             = 37;        // left key
+const KEYRIGHT            = 39;        // right key
+const Z_ROT_INC            = 86;
+const Z_ROT_DEC            = 87;
+const VIEW_INCREMENT    = 1;        // amount to move in degrees
+const Z = 90;
+const S = 83;
+const A = 65;
+const D = 68;
+const Q = 81;
+const distance = 0.25; // how much does the camera move during forward/backward/left/right
+document.addEventListener('keydown', function(e) {
+    var key = e.keyCode;
+    console.log(key);
+
+    switch (key) {
+
+        case Z:
+            camera.translateZ(-distance);
+            break;
+
+        case S:
+            camera.translateZ(distance);
+            break;
+
+        case A:
+            camera.translateX(-distance);
+            break;
+        case D:
+            camera.translateX(distance);
+            break;
+
+        case Q:
+            console.log("Q!");
+            camera.translateX(-distance);
+            break;
+        case KEYUP:
+            // x increments, z depends of current y
+
+            if (camera.getRotateX() < 90) {
+                camera.setRotateX(camera.getRotateX() + VIEW_INCREMENT);
+            }
+            break;
+
+        case KEYDOWN:
+
+            if (camera.getRotateX() > -90) {
+                camera.setRotateX(camera.getRotateX() - VIEW_INCREMENT);
+            }
+            break;
+
+        case KEYLEFT:
+
+            camera.setRotateY(camera.getRotateY() + VIEW_INCREMENT);
+            break;
+
+        case KEYRIGHT:
+
+            camera.setRotateY(camera.getRotateY() - VIEW_INCREMENT);
+            break;
+
+        case Z_ROT_INC:
+
+            camera.setRotateZ(camera.getRotateZ() + VIEW_INCREMENT);
+            break;
+
+        case Z_ROT_DEC:
+
+            camera.setRotateZ(camera.getRotateZ() - VIEW_INCREMENT);
+            break;
+
+    }
+});
